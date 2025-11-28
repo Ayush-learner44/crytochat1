@@ -1,84 +1,116 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import "./home.css";
 
 export default function HomePage() {
-  const router = useRouter();
-  const [error, setError] = useState("");
+    const router = useRouter();
 
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
+    // State for inputs
+    const [username, setUsername] = useState("");
+    const [keyFileBytes, setKeyFileBytes] = useState(null);
+    const [fileName, setFileName] = useState(""); // Just for display
+    const [error, setError] = useState("");
 
-    // 1. Infer username from filename (e.g. "alice_private.key" -> "alice")
-    // This is a convenience. You can also ask user to type it if preferred.
-    const filename = file.name;
-    const inferredUsername = filename.split('_')[0];
+    const handleFileUpload = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
 
-    if (!inferredUsername) {
-      setError("Invalid filename. Expected format: username_private.key");
-      return;
-    }
+        setFileName(file.name); // Show user which file they picked
 
-    // 2. Read the file
-    const reader = new FileReader();
-
-    reader.onload = async (e) => {
-      try {
-        const arrayBuffer = e.target.result;
-        // Verify it's not empty
-        if (arrayBuffer.byteLength === 0) {
-          setError("Key file is empty!");
-          return;
-        }
-
-        // 3. Store in sessionStorage (Temporary RAM storage for the session)
-        // We convert to Base64 to pass it to the Chat page safely
-        const keyBytes = new Uint8Array(arrayBuffer);
-        const base64Key = Buffer.from(keyBytes).toString('base64');
-
-        sessionStorage.setItem("chat_session_key", base64Key);
-
-        // 4. Redirect to Chat
-        router.push(`/chat?user=${inferredUsername}`);
-
-      } catch (err) {
-        console.error(err);
-        setError("Failed to parse key file.");
-      }
+        // Read the file into memory
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const arrayBuffer = e.target.result;
+                if (arrayBuffer.byteLength === 0) {
+                    setError("Error: Key file is empty.");
+                    return;
+                }
+                // Save the raw bytes to state (waiting for Login click)
+                const bytes = new Uint8Array(arrayBuffer);
+                setKeyFileBytes(bytes);
+                setError("");
+            } catch (err) {
+                console.error(err);
+                setError("Failed to read key file.");
+            }
+        };
+        reader.readAsArrayBuffer(file);
     };
 
-    reader.readAsArrayBuffer(file);
-  };
+    const handleLogin = () => {
+        if (!username.trim()) {
+            setError("Please enter your username.");
+            return;
+        }
+        if (!keyFileBytes) {
+            setError("Please upload your Private Key.");
+            return;
+        }
 
-  return (
-    <div className="page">
-      <div className="card">
-        <h1 className="title">PQC Chat Login</h1>
-        <p className="subtitle">Identity-Based Authentication</p>
+        // SUCCESS: Store Identity in Session and Redirect
+        try {
+            const base64Key = Buffer.from(keyFileBytes).toString('base64');
+            sessionStorage.setItem("chat_session_key", base64Key);
 
-        <div className="upload-section">
-          <label className="upload-label">
-            Upload your Private Key (.key)
-          </label>
-          <input
-            type="file"
-            accept=".key"
-            onChange={handleFileUpload}
-            className="file-input"
-          />
+            // Redirect to the username you TYPED
+            router.push(`/chat?user=${username.trim()}`);
+        } catch (e) {
+            setError("Login processing failed.");
+        }
+    };
+
+    return (
+        <div className="page">
+            <div className="card">
+                <h1 className="title">PQC Chat Login</h1>
+                <p className="subtitle">Secure Identity Access</p>
+
+                {/* 1. USERNAME INPUT */}
+                <div className="input-group">
+                    <label className="input-label">Username</label>
+                    <input
+                        type="text"
+                        placeholder="e.g. alice"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        className="text-input"
+                    />
+                </div>
+
+                {/* 2. FILE UPLOAD */}
+                <div className="input-group">
+                    <label className="input-label">Private Key File</label>
+
+                    {/* Custom File Button Styling */}
+                    <div className="file-upload-wrapper">
+                        <input
+                            type="file"
+                            accept=".key"
+                            id="file-upload"
+                            onChange={handleFileUpload}
+                            className="hidden-file-input"
+                        />
+                        <label htmlFor="file-upload" className="file-upload-button">
+                            {fileName ? "📄 " + fileName : "📂 Click to Upload Key"}
+                        </label>
+                    </div>
+                </div>
+
+                {error && <p className="error">{error}</p>}
+
+                <button onClick={handleLogin} className="primary-button">
+                    Login to Chat
+                </button>
+
+                <div className="divider">or</div>
+
+                <button onClick={() => router.push("/register")} className="outline-button">
+                    Create New Identity
+                </button>
+            </div>
         </div>
-
-        {error && <p className="error">{error}</p>}
-
-        <div className="divider">or</div>
-
-        <button onClick={() => router.push("/register")} className="outline-button">
-          Create New Identity
-        </button>
-      </div>
-    </div>
-  );
+    );
 }

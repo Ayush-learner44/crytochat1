@@ -1,32 +1,23 @@
 /* app/chat/chat.css */
 
-/* 1. PAGE LAYOUT */
 .chat-page {
-    height: 100dvh;
-    /* Force full screen height */
-    width: 100vw;
-    background-color: #f3f4f6;
+    height: 100vh;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    background: #f0f2f5;
     font-family: system-ui, -apple-system, sans-serif;
     padding: 1rem;
     box-sizing: border-box;
     overflow: hidden;
 }
 
-/* 2. TOP BAR */
 .top-bar {
-    width: 100%;
-    max-width: 800px;
-    flex-shrink: 0;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.8rem;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 0 2.5rem;
-    box-sizing: border-box;
+    justify-content: flex-start;
+    gap: 1rem;
+    flex-shrink: 0;
 }
 
 .home-button {
@@ -41,75 +32,77 @@
 }
 
 .profile-badge {
-    background: white;
+    background: #ffffff;
     padding: 6px 12px;
     border-radius: 20px;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     color: #111827;
-    font-weight: 700;
     border: 1px solid #d1d5db;
+    font-weight: 500;
 }
 
-/* 3. MAIN CARD - THE FIX */
+/* MAIN CARD */
 .chat-card {
     background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 800px;
-    /* DESKTOP HEIGHT: Fixed at 85% of screen */
     height: 85vh;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-    /* Fix for flexbox scrolling issues */
-    min-height: 0;
+    padding: 1rem;
+    margin: 0 auto;
+    box-sizing: border-box;
 }
 
-/* 4. HEADER (Controls) */
+/* CONTROLS ROW */
 .recipient-row {
-    padding: 0.75rem;
-    background: #ffffff;
-    border-bottom: 1px solid #e5e7eb;
     display: flex;
     gap: 0.5rem;
-    flex-shrink: 0;
-    /* Never shrink */
+    margin-bottom: 0.8rem;
     align-items: center;
+    flex-shrink: 0;
     flex-wrap: wrap;
-    /* Wrap on mobile */
 }
 
-/* Input Box */
+/* ✅ THE FIX: Explicit styling for the Input Box */
 .recipient-input {
-    flex: 1 1 180px;
-    /* Base width */
-    padding: 0 0.8rem;
+    flex-grow: 10;
+    padding: 0.5rem 0.8rem;
     border: 1px solid #d1d5db;
     border-radius: 6px;
     font-size: 0.95rem;
-    height: 40px;
+    background-color: #ffffff;
+    /* Force White */
+    color: #000000;
+    /* Force Black */
+    min-width: 160px;
+    height: 38px;
     box-sizing: border-box;
-    color: #000;
-    background: #fff;
 }
 
-/* Buttons */
+.recipient-input::placeholder {
+    color: #6b7280;
+    /* Visible Gray */
+}
+
+/* BUTTONS */
 .connect-button,
 .refresh-button,
 .delete-button,
 .disconnect-button {
-    flex: 1 1 auto;
     border: none;
     border-radius: 6px;
-    padding: 0 1rem;
-    height: 40px;
+    padding: 0 0.8rem;
+    height: 38px;
     font-size: 0.85rem;
     font-weight: 600;
     color: white;
     cursor: pointer;
     white-space: nowrap;
     text-align: center;
+    flex-grow: 1;
 }
 
 .connect-button {
@@ -128,37 +121,34 @@
     background: #4b5563;
 }
 
-/* 5. CHAT WINDOW - SCROLL AREA */
+/* CHAT AREA */
 .chat-window {
     flex: 1;
-    /* Fill all remaining space */
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
     background-color: #f9fafb;
-    position: relative;
-    min-height: 0;
-    /* Critical Fix */
 }
 
 .messages {
     flex: 1;
     overflow-y: auto;
-    /* Scroll here */
     padding: 1rem;
     display: flex;
     flex-direction: column;
     gap: 0;
 }
 
-/* MESSAGE STYLE */
+/* MESSAGE STYLING (List Style) */
 .message {
-    padding: 8px 0;
-    border-bottom: 1px dashed #e5e7eb;
+    padding: 10px;
+    margin-bottom: 5px;
     font-size: 0.95rem;
     line-height: 1.4;
     word-wrap: break-word;
-    color: #374151;
+    border-bottom: 1px dashed #e5e7eb;
 }
 
 .message:last-child {
@@ -168,11 +158,13 @@
 .message.me {
     text-align: right;
     color: #1e3a8a;
+    /* Dark Blue */
 }
 
 .message.them {
     text-align: left;
     color: #065f46;
+    /* Dark Green */
 }
 
 .message.system {
@@ -180,7 +172,8 @@
     color: #6b7280;
     font-style: italic;
     font-size: 0.8rem;
-    padding: 10px 0;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 5px;
 }
 
 .from {
@@ -195,15 +188,14 @@
     margin-left: 8px;
 }
 
-/* 6. FOOTER (Input) */
+/* INPUT */
 .input-row {
-    flex-shrink: 0;
-    /* Never shrink */
-    padding: 0.75rem;
-    background: white;
-    border-top: 1px solid #e5e7eb;
     display: flex;
     gap: 0.5rem;
+    padding: 0.8rem;
+    background: white;
+    border-top: 1px solid #e5e7eb;
+    flex-shrink: 0;
 }
 
 .message-input {
@@ -212,53 +204,40 @@
     border: 1px solid #d1d5db;
     border-radius: 6px;
     font-size: 1rem;
-    color: #000;
+    color: #000000;
 }
 
 .send-button {
     background: #10b981;
     color: white;
     border: none;
-    padding: 0 1.5rem;
+    padding: 0 1.2rem;
     border-radius: 6px;
     font-weight: bold;
     cursor: pointer;
 }
 
-/* 7. MOBILE OVERRIDES - THE FIX */
+/* MOBILE */
 @media (max-width: 600px) {
     .chat-page {
-        padding: 5px;
-        /* Remove padding */
+        padding: 0.5rem;
+        height: 100dvh;
     }
 
     .chat-card {
-        /* MOBILE HEIGHT: Force full screen height */
-        height: 100dvh !important;
-        max-height: none;
-        border-radius: 0;
-        box-shadow: none;
-    }
-
-    .top-bar {
-        padding: 0.5rem;
-        background: #f3f4f6;
-        margin-bottom: 0;
+        height: 100%;
+        border-radius: 8px;
     }
 
     .recipient-row {
         gap: 0.4rem;
-        padding: 0.5rem;
     }
 
     .recipient-input {
         width: 100%;
         flex-basis: 100%;
-        /* Input takes full row */
-        margin-bottom: 2px;
     }
 
-    /* Buttons: 2 per row */
     .connect-button,
     .refresh-button,
     .delete-button,
