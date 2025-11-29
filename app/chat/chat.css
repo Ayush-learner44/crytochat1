@@ -144,40 +144,51 @@
     cursor: pointer;
     white-space: nowrap;
     text-align: center;
+    transition: background-color 0.2s ease;
+    /* Makes the hover smooth */
 }
 
+/* CONNECT (Blue) */
 .connect-button {
     background: #2563eb;
 }
 
 .connect-button:hover {
-    background: #123a90;
+    background: #1d4ed8;
 }
 
+/* CLEAR (Orange) */
 .refresh-button {
     background: #f59e0b;
 }
 
-.refresh-button {
-    background: #c58008;
+.refresh-button:hover {
+    background: #d97706;
 }
 
+/* Fix: Added :hover */
+
+/* DELETE (Red) */
 .delete-button {
     background: #ef4444;
 }
 
-.delete-button {
-    background: #af3232;
+.delete-button:hover {
+    background: #dc2626;
 }
 
+/* Fix: Added :hover */
+
+/* DISCONNECT (Dark Gray) */
 .disconnect-button {
     background: #4b5563;
 }
 
-.disconnect-button {
-    background: #313740;
+.disconnect-button:hover {
+    background: #374151;
 }
 
+/* Fix: Added :hover */
 /* 5. CHAT WINDOW - SCROLL AREA */
 .chat-window {
     flex: 1;
