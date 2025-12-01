@@ -11,38 +11,24 @@ if (!global._mongoClientPromise) {
 clientPromise = global._mongoClientPromise;
 
 export default async function handler(req, res) {
-    try {
-        const client = await clientPromise;
-        const db = client.db("chatapp"); // Database Name
-        const users = db.collection("users");
+    const client = await clientPromise;
+    const db = client.db("chatapp");
+    const users = db.collection("users");
 
-        if (req.method === "POST") {
-            const { username, publicKey } = req.body;
+    if (req.method === "POST") {
+        const { username } = req.body;
 
-            if (!username || !username.trim()) {
-                return res.status(400).json({ message: "Username required" });
-            }
-            if (!publicKey) {
-                return res.status(400).json({ message: "Public Key required" });
-            }
+        if (!username) return res.status(400).json({ message: "Username required" });
 
-            const existing = await users.findOne({ username });
-            if (existing) {
-                return res.status(400).json({ message: "Username already exists" });
-            }
+        // CHECK IF USER EXISTS
+        const user = await users.findOne({ username });
 
-            await users.insertOne({
-                username,
-                publicKey,
-                createdAt: new Date()
-            });
-
-            return res.status(200).json({ message: "User registered successfully" });
+        if (!user) {
+            return res.status(404).json({ message: "User not registered. Please sign up first." });
         }
 
-        res.status(405).json({ message: "Method not allowed" });
-    } catch (e) {
-        console.error("Register API error:", e);
-        res.status(500).json({ message: "Internal server error" });
+        return res.status(200).json({ message: "User exists", publicKey: user.publicKey });
     }
+
+    res.status(405).json({ message: "Method not allowed" });
 }

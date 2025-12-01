@@ -7,19 +7,20 @@ import "./home.css";
 export default function HomePage() {
     const router = useRouter();
 
-    // State for inputs
+    // State
     const [username, setUsername] = useState("");
     const [keyFileBytes, setKeyFileBytes] = useState(null);
-    const [fileName, setFileName] = useState(""); // Just for display
+    const [fileName, setFileName] = useState("");
     const [error, setError] = useState("");
 
     const handleFileUpload = (event) => {
         const file = event.target.files[0];
         if (!file) return;
 
-        setFileName(file.name); // Show user which file they picked
+        setFileName(file.name);
+        const inferredName = file.name.split('_')[0];
+        if (inferredName && !username) setUsername(inferredName);
 
-        // Read the file into memory
         const reader = new FileReader();
         reader.onload = async (e) => {
             try {
@@ -28,19 +29,17 @@ export default function HomePage() {
                     setError("Error: Key file is empty.");
                     return;
                 }
-                // Save the raw bytes to state (waiting for Login click)
-                const bytes = new Uint8Array(arrayBuffer);
-                setKeyFileBytes(bytes);
+                setKeyFileBytes(new Uint8Array(arrayBuffer));
                 setError("");
             } catch (err) {
-                console.error(err);
                 setError("Failed to read key file.");
             }
         };
         reader.readAsArrayBuffer(file);
     };
 
-    const handleLogin = () => {
+    const handleLogin = async () => {
+        // 1. Local Validation
         if (!username.trim()) {
             setError("Please enter your username.");
             return;
@@ -50,15 +49,27 @@ export default function HomePage() {
             return;
         }
 
-        // SUCCESS: Store Identity in Session and Redirect
+        // 2. SERVER CHECK: Does this user exist?
         try {
+            const res = await fetch("/api/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username })
+            });
+
+            if (!res.ok) {
+                const data = await res.json();
+                setError(data.message || "Login failed");
+                return;
+            }
+
+            // 3. SUCCESS: Proceed to Chat
             const base64Key = Buffer.from(keyFileBytes).toString('base64');
             sessionStorage.setItem("chat_session_key", base64Key);
-
-            // Redirect to the username you TYPED
             router.push(`/chat?user=${username.trim()}`);
+
         } catch (e) {
-            setError("Login processing failed.");
+            setError("Server connection failed.");
         }
     };
 
@@ -68,9 +79,9 @@ export default function HomePage() {
                 <h1 className="title">PQC Chat Login</h1>
                 <p className="subtitle">Secure Identity Access</p>
 
-                {/* 1. USERNAME INPUT */}
+                {/* USERNAME */}
                 <div className="input-group">
-
+                    <label className="input-label">Username</label>
                     <input
                         type="text"
                         placeholder="Username"
@@ -80,11 +91,9 @@ export default function HomePage() {
                     />
                 </div>
 
-                {/* 2. FILE UPLOAD */}
+                {/* FILE UPLOAD */}
                 <div className="input-group">
                     <label className="input-label">Private Key File</label>
-
-                    {/* Custom File Button Styling */}
                     <div className="file-upload-wrapper">
                         <input
                             type="file"
